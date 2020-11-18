@@ -1,6 +1,14 @@
+# パスワードロックを解除したPDFを生成するやつ
+
+Goのpdf-cpuをWebAssembly(wasm)経由でブラウザから叩けます。pdfcpuはv0.1.24、Goは1.12を使わないと動かなかった。
+
+フォーク元ではpdfcpuが0.1.23になっているのですが、0.1.24で新しい暗号化形式に対応したのでアップデートしました。
+
+This is a fork: https://github.com/wcchoi/go-wasm-pdfcpu
+
 ## Running a command line tool written in Go on browser with WebAssembly
 
-This repo contains code/assets from the [article](article.md)
+This repo contains code/assets from the [original article](https://github.com/wcchoi/go-wasm-pdfcpu/blob/master/article.md)
 
 Files:
 ```

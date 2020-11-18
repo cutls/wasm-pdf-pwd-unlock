@@ -8,10 +8,10 @@ class GoWorker {
         console.log("GoWorker constructed");
     }
 
-    async validate(buffer) {
+    async validate(buffer, pwd) {
         await this.beforeProcess(buffer);
         try {
-            this.go.argv = ['pdfcpu.wasm', 'validate', '/test.pdf'];
+            this.go.argv = ['pdfcpu.wasm', 'validate', '-upw', pwd, '/test.pdf'];
             var st = Date.now();
             await this.go.run(this.instance);
             console.log('Time taken:', Date.now() - st);
@@ -24,21 +24,21 @@ class GoWorker {
         }
     }
 
-    async extractPage(buffer, page) {
+    async extractPage(buffer, pwd) {
         await this.beforeProcess(buffer);
 
-        this.go.argv = ['pdfcpu.wasm', 'trim', '-pages', String(page), '/test.pdf', '/first_page.pdf'];
+        this.go.argv = ['pdfcpu.wasm', 'decrypt', '-upw', pwd, '/test.pdf', '/decrypted_file.pdf'];
         var st = Date.now();
         await this.go.run(this.instance);
         console.log('Time taken:', Date.now() - st);
 
-        let contents = await this.fs.readFileAsync('/first_page.pdf');
+        let contents = await this.fs.readFileAsync('/decrypted_file.pdf');
         console.log("after run main:", contents);
 
         this.fs.unlink('/test.pdf', err => {
             console.log("Removed test.pdf", err);
-            this.fs.unlink('/first_page.pdf', err2 => {
-                console.log("Removed first_page.pdf", err);
+            this.fs.unlink('/decrypted_file.pdf', err2 => {
+                console.log("Removed decrypted_file.pdf", err);
             })
         })
 
@@ -50,7 +50,7 @@ class GoWorker {
         // because there are states in the go obj that prevent it from running multiple times
         this.go = new Go();
 
-        if(!this.compiledModule) {
+        if (!this.compiledModule) {
             let result = await WebAssembly.instantiateStreaming(fetch("pdfcpu.wasm"), this.go.importObject);
             console.log("wasm module compiled!")
             this.compiledModule = result.module; // cache, so that no need to download next time process is called
@@ -69,7 +69,7 @@ console.log("pre config");
 // Configures BrowserFS to use the InMemory file system.
 BrowserFS.configure({
     fs: "InMemory"
-}, function(e) {
+}, function (e) {
     if (e) {
         // An error happened!
         throw e;
